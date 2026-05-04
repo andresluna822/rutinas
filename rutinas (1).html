@@ -1,0 +1,1670 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rutinas</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0e10;
+    --bg2: #18181c;
+    --bg3: #222228;
+    --surface: #1e1e24;
+    --surface2: #2a2a34;
+    --border: #2e2e3a;
+    --accent: #e0ff4f;
+    --accent2: #4fffb0;
+    --accent3: #ff6b4a;
+    --text: #f0f0f5;
+    --text2: #9090a8;
+    --text3: #5a5a72;
+    --radius: 14px;
+    --shadow: 0 4px 32px rgba(0,0,0,0.5);
+    --custom-bg-image: none;
+    --custom-bg-color: #0e0e10;
+    --custom-accent: #e0ff4f;
+    --custom-accent2: #4fffb0;
+    --custom-alpha: 1;
+  }
+  .light-mode {
+    --bg: #f4f4f0;
+    --bg2: #eaeae4;
+    --bg3: #e0e0d8;
+    --surface: #ffffff;
+    --surface2: #f0f0ea;
+    --border: #d8d8ce;
+    --text: #18181c;
+    --text2: #5a5a62;
+    --text3: #9a9aa8;
+    --shadow: 0 4px 32px rgba(0,0,0,0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+    transition: background 0.3s, color 0.3s;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: var(--custom-bg-image);
+    background-size: cover;
+    background-position: center;
+    opacity: calc(1 - var(--custom-alpha, 1) + 0.15);
+    z-index: 0;
+    pointer-events: none;
+  }
+  .app-wrapper {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 72px;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+    gap: 8px;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 100;
+    transition: width 0.3s;
+  }
+  .sidebar.expanded { width: 200px; }
+  .sidebar-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .nav-item {
+    width: calc(100% - 16px);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    color: var(--text2);
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    border: none;
+    background: none;
+    text-align: left;
+  }
+  .nav-item:hover { background: var(--surface); color: var(--text); }
+  .nav-item.active { background: var(--accent); color: #0e0e10; }
+  .nav-icon { font-size: 20px; flex-shrink: 0; }
+  .nav-label { opacity: 0; transition: opacity 0.2s; }
+  .sidebar.expanded .nav-label { opacity: 1; }
+  .sidebar-toggle {
+    margin-top: auto;
+    background: none;
+    border: none;
+    color: var(--text3);
+    cursor: pointer;
+    font-size: 18px;
+    padding: 12px;
+  }
+
+  /* MAIN */
+  .main {
+    margin-left: 72px;
+    flex: 1;
+    padding: 28px 32px;
+    transition: margin-left 0.3s;
+    max-width: 1200px;
+  }
+  .sidebar.expanded ~ .main { margin-left: 200px; }
+
+  /* TOP BAR */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+  }
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    letter-spacing: 2px;
+    color: var(--text);
+  }
+  .page-title span { color: var(--accent); }
+  .topbar-actions { display: flex; gap: 10px; align-items: center; }
+  .btn {
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .btn-accent { background: var(--accent); color: #0e0e10; }
+  .btn-accent:hover { filter: brightness(1.1); transform: translateY(-1px); }
+  .btn-ghost { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--surface2); }
+  .btn-danger { background: #ff3b3b22; color: #ff6b6b; border: 1px solid #ff3b3b44; }
+  .btn-danger:hover { background: #ff3b3b44; }
+  .btn-sm { padding: 6px 14px; font-size: 12px; border-radius: 8px; }
+  .theme-toggle {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+  }
+  .theme-toggle:hover { background: var(--surface2); }
+
+  /* PAGES */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+    box-shadow: var(--shadow);
+  }
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 18px;
+  }
+
+  /* STATS GRID */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--accent);
+    border-radius: 0 0 4px 4px;
+  }
+  .stat-card.green::after { background: var(--accent2); }
+  .stat-card.orange::after { background: var(--accent3); }
+  .stat-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 6px; }
+  .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--text); }
+  .stat-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+  /* RUTINAS CARDS */
+  .rutina-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    position: relative;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+  }
+  .rutina-card:hover { transform: translateY(-2px); box-shadow: 0 8px 40px rgba(0,0,0,0.4); }
+  .rutina-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+  .rutina-type-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: var(--accent);
+    color: #0e0e10;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 500;
+  }
+  .rutina-name { font-family: 'Bebas Neue', sans-serif; font-size: 22px; margin-bottom: 4px; }
+  .rutina-meta { font-size: 12px; color: var(--text3); }
+  .rutina-exercises { margin: 12px 0; display: flex; flex-direction: column; gap: 6px; }
+  .exercise-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; padding: 6px 10px; background: var(--bg3); border-radius: 8px; }
+  .exercise-name { color: var(--text2); }
+  .exercise-detail { color: var(--accent); font-family: 'DM Mono', monospace; font-size: 11px; }
+  .rutina-keywords { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .keyword-tag { font-size: 10px; padding: 3px 9px; border-radius: 20px; background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+  .rutina-actions { display: flex; gap: 8px; margin-top: 14px; }
+  .rutina-photo { width: 100%; height: 120px; object-fit: cover; border-radius: 10px; margin-top: 12px; }
+  .objetivo-badge {
+    font-size: 10px; padding: 3px 9px; border-radius: 20px;
+    background: #4fffb022; color: var(--accent2); border: 1px solid #4fffb044;
+    margin-top: 8px; display: inline-block;
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(6px);
+    z-index: 1000;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px;
+    width: 90%;
+    max-width: 580px;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: translateY(20px);
+    transition: transform 0.3s;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; margin-bottom: 22px; }
+
+  /* FORM */
+  .form-group { margin-bottom: 18px; }
+  .form-label { font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 7px; display: block; }
+  .form-input, .form-select, .form-textarea {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border 0.2s;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
+  .form-textarea { min-height: 130px; resize: vertical; font-family: 'DM Mono', monospace; font-size: 12px; }
+  .form-select option { background: var(--bg2); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-hint { font-size: 11px; color: var(--text3); margin-top: 6px; }
+
+  /* GRAPH */
+  .chart-container { position: relative; margin-top: 10px; }
+  canvas { border-radius: 10px; }
+
+  /* WEIGHT LOG */
+  .weight-list { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+  .weight-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--bg3); border-radius: 10px; }
+  .weight-date { font-size: 12px; color: var(--text3); }
+  .weight-val { font-family: 'Bebas Neue', sans-serif; font-size: 22px; }
+
+  /* PERFIL */
+  .profile-avatar {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    color: #0e0e10;
+    cursor: pointer;
+    overflow: hidden;
+    border: 3px solid var(--border);
+  }
+  .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .profile-header { display: flex; gap: 22px; align-items: center; margin-bottom: 28px; }
+  .profile-info h2 { font-family: 'Bebas Neue', sans-serif; font-size: 32px; }
+  .profile-info p { color: var(--text2); font-size: 14px; }
+
+  /* OBJETIVOS */
+  .objetivo-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .objetivo-check {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.2s, border 0.2s;
+  }
+  .objetivo-check.done { background: var(--accent2); border-color: var(--accent2); }
+  .objetivo-text { flex: 1; }
+  .objetivo-text h4 { font-size: 14px; font-weight: 600; }
+  .objetivo-text p { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .objetivo-text.done h4 { text-decoration: line-through; color: var(--text3); }
+
+  /* COLOR PICKER ROW */
+  .color-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .color-swatch {
+    width: 32px; height: 32px; border-radius: 8px; cursor: pointer;
+    border: 2px solid transparent; transition: border 0.2s;
+  }
+  .color-swatch.selected { border-color: var(--text); }
+
+  /* EMPTY STATE */
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--text3); }
+  .empty-state .empty-icon { font-size: 52px; margin-bottom: 16px; }
+  .empty-state h3 { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--text2); margin-bottom: 8px; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 28px; right: 28px;
+    background: var(--accent); color: #0e0e10;
+    padding: 12px 22px; border-radius: 10px;
+    font-size: 13px; font-weight: 700;
+    z-index: 9999;
+    transform: translateY(60px); opacity: 0;
+    transition: all 0.3s;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.error { background: var(--accent3); }
+
+  /* DIVIDER */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+  /* SECTION TITLE */
+  .section-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--text); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+  .section-title span { font-size: 14px; color: var(--text3); font-family: 'DM Sans', sans-serif; font-weight: 400; }
+
+  /* JSON HELPER */
+  .json-helper {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+  }
+  .json-helper p { font-size: 12px; color: var(--text2); margin-bottom: 6px; }
+  .json-helper pre { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent2); overflow-x: auto; }
+
+  /* RANGE */
+  input[type=range] { -webkit-appearance: none; width: 100%; height: 6px; border-radius: 4px; background: var(--border); outline: none; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); cursor: pointer; }
+
+  @media (max-width: 640px) {
+    .main { padding: 16px; }
+    .form-row { grid-template-columns: 1fr; }
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .card-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="app-wrapper">
+  <!-- SIDEBAR -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-logo">R</div>
+    <button class="nav-item active" onclick="navigate('dashboard')">
+      <span class="nav-icon">🏠</span><span class="nav-label">Inicio</span>
+    </button>
+    <button class="nav-item" onclick="navigate('rutinas')">
+      <span class="nav-icon">💪</span><span class="nav-label">Rutinas</span>
+    </button>
+    <button class="nav-item" onclick="navigate('peso')">
+      <span class="nav-icon">⚖️</span><span class="nav-label">Peso</span>
+    </button>
+    <button class="nav-item" onclick="navigate('objetivos')">
+      <span class="nav-icon">🎯</span><span class="nav-label">Objetivos</span>
+    </button>
+    <button class="nav-item" onclick="navigate('perfil')">
+      <span class="nav-icon">👤</span><span class="nav-label">Perfil</span>
+    </button>
+    <button class="sidebar-toggle" onclick="toggleSidebar()">⟷</button>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main" id="main">
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <h1 class="page-title" id="pageTitle">INICIO</h1>
+      <div class="topbar-actions">
+        <button class="theme-toggle" onclick="toggleTheme()" title="Cambiar tema">☀️</button>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <section class="page active" id="page-dashboard">
+      <div class="stats-row" id="statsRow"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:28px;" class="two-col">
+        <div class="card">
+          <div class="section-title">Última actividad</div>
+          <div id="lastActivity"></div>
+        </div>
+        <div class="card">
+          <div class="section-title">Próxima rutina</div>
+          <div id="nextRoutine"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-title">Rutinas recientes <span>últimas 3</span></div>
+        <div class="card-grid" id="recentRutinas"></div>
+      </div>
+    </section>
+
+    <!-- RUTINAS -->
+    <section class="page" id="page-rutinas">
+      <div style="display:flex;gap:10px;margin-bottom:22px;flex-wrap:wrap;">
+        <button class="btn btn-accent" onclick="openModalAdd()">➕ Nueva rutina</button>
+        <button class="btn btn-ghost" onclick="openModalJson()">📋 Añadir por JSON</button>
+        <input type="text" class="form-input" style="max-width:220px;padding:10px 14px;" placeholder="🔍 Buscar rutina..." id="searchInput" oninput="renderRutinas()">
+        <select class="form-select" style="max-width:160px;padding:10px 14px;" id="filterType" onchange="renderRutinas()">
+          <option value="">Todos los tipos</option>
+          <option value="tabata">Tabata</option>
+          <option value="repeticiones">Repeticiones</option>
+          <option value="circuito">Circuito</option>
+          <option value="amrap">AMRAP</option>
+          <option value="fuerza">Fuerza</option>
+          <option value="cardio">Cardio</option>
+          <option value="yoga">Yoga / Movilidad</option>
+          <option value="hiit">HIIT</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+      <div class="card-grid" id="rutinasGrid"></div>
+      <div class="empty-state" id="rutinasEmpty" style="display:none;">
+        <div class="empty-icon">🏋️</div>
+        <h3>Sin rutinas aún</h3>
+        <p>Crea tu primera rutina o añade una por JSON</p>
+      </div>
+    </section>
+
+    <!-- PESO -->
+    <section class="page" id="page-peso">
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:18px;align-items:start;">
+        <div class="card">
+          <div class="section-title">Progreso de peso</div>
+          <div class="chart-container">
+            <canvas id="weightChart" height="220"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-title">Registrar peso</div>
+          <div class="form-group">
+            <label class="form-label">Peso</label>
+            <input type="number" class="form-input" id="newWeight" placeholder="70.5" step="0.1">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Unidad</label>
+            <select class="form-select" id="weightUnit">
+              <option value="kg">kg</option>
+              <option value="lb">lb</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fecha</label>
+            <input type="datetime-local" class="form-input" id="weightDate">
+          </div>
+          <button class="btn btn-accent" style="width:100%;" onclick="addWeight()">Guardar</button>
+          <div class="weight-list" id="weightList"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- OBJETIVOS -->
+    <section class="page" id="page-objetivos">
+      <div style="display:flex;gap:10px;margin-bottom:22px;flex-wrap:wrap;">
+        <button class="btn btn-accent" onclick="openModalObjetivo()">➕ Nuevo objetivo</button>
+      </div>
+      <div style="display:grid;gap:18px;grid-template-columns:1fr 1fr;" class="two-col">
+        <div>
+          <div class="section-title">Generales</div>
+          <div style="display:flex;flex-direction:column;gap:10px;" id="objetivosGenerales"></div>
+        </div>
+        <div>
+          <div class="section-title">Por rutina</div>
+          <div style="display:flex;flex-direction:column;gap:10px;" id="objetivosRutina"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PERFIL -->
+    <section class="page" id="page-perfil">
+      <div class="card" style="max-width:680px;">
+        <div class="profile-header">
+          <div class="profile-avatar" id="avatarDisplay" onclick="document.getElementById('avatarInput').click()">
+            <span id="avatarInitial">?</span>
+            <img id="avatarImg" style="display:none;" alt="avatar">
+          </div>
+          <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="loadAvatar(this)">
+          <div class="profile-info">
+            <h2 id="profileName">Tu nombre</h2>
+            <p id="profileSub">Configura tu perfil</p>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Nombre</label>
+            <input type="text" class="form-input" id="pNombre" placeholder="Tu nombre">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Edad</label>
+            <input type="number" class="form-input" id="pEdad" placeholder="25">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Peso actual (kg)</label>
+            <input type="number" class="form-input" id="pPeso" placeholder="70">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fecha de inicio</label>
+            <input type="date" class="form-input" id="pInicio">
+          </div>
+        </div>
+        <button class="btn btn-accent" onclick="saveProfile()">💾 Guardar perfil</button>
+
+        <hr class="divider">
+        <div class="section-title">Apariencia</div>
+
+        <div class="form-group">
+          <label class="form-label">Tema</label>
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-ghost" onclick="setTheme('dark')">🌙 Oscuro</button>
+            <button class="btn btn-ghost" onclick="setTheme('light')">☀️ Claro</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Color de acento</label>
+          <div class="color-row" id="accentPicker">
+            <div class="color-swatch" style="background:#e0ff4f;" onclick="setAccent('#e0ff4f','#4fffb0')"></div>
+            <div class="color-swatch" style="background:#4fffb0;" onclick="setAccent('#4fffb0','#e0ff4f')"></div>
+            <div class="color-swatch" style="background:#ff6b4a;" onclick="setAccent('#ff6b4a','#ffb84a')"></div>
+            <div class="color-swatch" style="background:#4a9eff;" onclick="setAccent('#4a9eff','#a04aff')"></div>
+            <div class="color-swatch" style="background:#ff4ae0;" onclick="setAccent('#ff4ae0','#ff4a4a')"></div>
+            <div class="color-swatch" style="background:#ffffff;" onclick="setAccent('#ffffff','#cccccc')"></div>
+            <input type="color" id="customAccentColor" value="#e0ff4f" oninput="setAccent(this.value, '#ffffff')" style="width:32px;height:32px;border-radius:8px;border:none;cursor:pointer;padding:0;background:none;">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Fondo personalizado</label>
+          <input type="file" accept="image/*" onchange="loadBackground(this)" class="form-input" style="padding:8px;">
+          <button class="btn btn-ghost btn-sm" style="margin-top:8px;" onclick="clearBackground()">Quitar fondo</button>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Transparencia del fondo: <span id="alphaVal">100%</span></label>
+          <input type="range" min="0" max="100" value="100" id="bgAlpha" oninput="setBgAlpha(this.value)">
+        </div>
+
+        <hr class="divider">
+        <div class="section-title">Historial de uso</div>
+        <div style="display:flex;flex-direction:column;gap:8px;" id="usageHistory"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- MODAL: AÑADIR RUTINA -->
+<div class="modal-overlay" id="modalAdd">
+  <div class="modal">
+    <div class="modal-title">💪 Nueva Rutina</div>
+    <div class="form-group">
+      <label class="form-label">Nombre de la rutina</label>
+      <input type="text" class="form-input" id="rNombre" placeholder="Ej: Full Body Lunes">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Tipo de entrenamiento</label>
+        <select class="form-select" id="rTipo">
+          <option value="tabata">Tabata</option>
+          <option value="repeticiones">Repeticiones</option>
+          <option value="circuito">Circuito</option>
+          <option value="amrap">AMRAP</option>
+          <option value="fuerza">Fuerza</option>
+          <option value="cardio">Cardio</option>
+          <option value="yoga">Yoga / Movilidad</option>
+          <option value="hiit">HIIT</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Duración estimada (min)</label>
+        <input type="number" class="form-input" id="rDuracion" placeholder="45">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Fecha inicio</label>
+        <input type="datetime-local" class="form-input" id="rFechaInicio">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Fecha fin</label>
+        <input type="datetime-local" class="form-input" id="rFechaFin">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Dificultad</label>
+      <select class="form-select" id="rDificultad">
+        <option value="principiante">Principiante</option>
+        <option value="intermedio">Intermedio</option>
+        <option value="avanzado">Avanzado</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Palabras clave (separadas por coma)</label>
+      <input type="text" class="form-input" id="rKeywords" placeholder="funcional, hipertrofia, fuerza">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Objetivo de esta rutina</label>
+      <input type="text" class="form-input" id="rObjetivo" placeholder="Ej: Aumentar masa muscular en piernas">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notas / descripción</label>
+      <textarea class="form-textarea" id="rNotas" placeholder="Notas adicionales..." style="min-height:70px;"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Foto de la rutina</label>
+      <input type="file" accept="image/*" class="form-input" id="rFoto" style="padding:8px;">
+    </div>
+    <hr class="divider">
+    <div class="section-title">Ejercicios <span><button class="btn btn-ghost btn-sm" onclick="addExerciseField()">+ Agregar</button></span></div>
+    <div id="exercisesContainer"></div>
+    <div style="display:flex;gap:10px;margin-top:22px;flex-wrap:wrap;">
+      <button class="btn btn-accent" onclick="saveRutina()">Guardar</button>
+      <button class="btn btn-ghost" onclick="closeModal('modalAdd')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: JSON -->
+<div class="modal-overlay" id="modalJson">
+  <div class="modal">
+    <div class="modal-title">📋 Añadir por JSON</div>
+    <div class="json-helper">
+      <p>Puedes pedir a una IA que genere una rutina con esta estructura, o crearla tú mismo:</p>
+      <pre id="jsonTemplate"></pre>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Pega tu JSON aquí</label>
+      <textarea class="form-textarea" id="jsonInput" placeholder='{"tipo":"tabata","nombre":"Mi rutina","rutina":[...]}' style="min-height:200px;"></textarea>
+      <div class="form-hint">Asegúrate de que sea JSON válido. Los campos extra se ignorarán.</div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;">
+      <button class="btn btn-accent" onclick="importJson()">Importar</button>
+      <button class="btn btn-ghost" onclick="copyJsonTemplate()">📋 Copiar template</button>
+      <button class="btn btn-ghost" onclick="closeModal('modalJson')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: VER RUTINA -->
+<div class="modal-overlay" id="modalView">
+  <div class="modal" style="max-width:640px;">
+    <div id="modalViewContent"></div>
+    <div style="display:flex;gap:10px;margin-top:22px;flex-wrap:wrap;" id="modalViewActions"></div>
+  </div>
+</div>
+
+<!-- MODAL: OBJETIVO -->
+<div class="modal-overlay" id="modalObjetivo">
+  <div class="modal">
+    <div class="modal-title">🎯 Nuevo Objetivo</div>
+    <div class="form-group">
+      <label class="form-label">Objetivo</label>
+      <input type="text" class="form-input" id="objTitulo" placeholder="Ej: Correr 5km sin parar">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Descripción</label>
+      <input type="text" class="form-input" id="objDesc" placeholder="Detalles opcionales">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Tipo</label>
+      <select class="form-select" id="objTipo">
+        <option value="general">General</option>
+        <option value="rutina">Por rutina</option>
+      </select>
+    </div>
+    <div class="form-group" id="objRutinaGroup" style="display:none;">
+      <label class="form-label">Rutina asociada</label>
+      <select class="form-select" id="objRutina"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Fecha límite (opcional)</label>
+      <input type="date" class="form-input" id="objFecha">
+    </div>
+    <div style="display:flex;gap:10px;margin-top:16px;">
+      <button class="btn btn-accent" onclick="saveObjetivo()">Guardar</button>
+      <button class="btn btn-ghost" onclick="closeModal('modalObjetivo')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: EDITAR RUTINA -->
+<div class="modal-overlay" id="modalEdit">
+  <div class="modal">
+    <div class="modal-title">✏️ Editar Rutina</div>
+    <div class="form-group">
+      <label class="form-label">Nombre</label>
+      <input type="text" class="form-input" id="eNombre">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Tipo</label>
+        <select class="form-select" id="eTipo">
+          <option value="tabata">Tabata</option>
+          <option value="repeticiones">Repeticiones</option>
+          <option value="circuito">Circuito</option>
+          <option value="amrap">AMRAP</option>
+          <option value="fuerza">Fuerza</option>
+          <option value="cardio">Cardio</option>
+          <option value="yoga">Yoga / Movilidad</option>
+          <option value="hiit">HIIT</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Duración (min)</label>
+        <input type="number" class="form-input" id="eDuracion">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Palabras clave</label>
+      <input type="text" class="form-input" id="eKeywords">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Objetivo</label>
+      <input type="text" class="form-input" id="eObjetivo">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notas</label>
+      <textarea class="form-textarea" id="eNotas" style="min-height:70px;"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Cambiar foto</label>
+      <input type="file" accept="image/*" class="form-input" id="eFoto" style="padding:8px;">
+    </div>
+    <input type="hidden" id="editId">
+    <div style="display:flex;gap:10px;margin-top:16px;">
+      <button class="btn btn-accent" onclick="updateRutina()">Guardar cambios</button>
+      <button class="btn btn-ghost" onclick="closeModal('modalEdit')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// =========== STORAGE HELPERS ===========
+const LS = {
+  get: k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+  set: (k, v) => localStorage.setItem(k, JSON.stringify(v)),
+};
+
+// =========== STATE ===========
+let state = {
+  rutinas: LS.get('rutinas') || [],
+  pesos: LS.get('pesos') || [],
+  objetivos: LS.get('objetivos') || [],
+  perfil: LS.get('perfil') || {},
+  tema: LS.get('tema') || 'dark',
+  accent: LS.get('accent') || '#e0ff4f',
+  accent2: LS.get('accent2') || '#4fffb0',
+  bgImage: LS.get('bgImage') || null,
+  bgAlpha: LS.get('bgAlpha') !== null ? LS.get('bgAlpha') : 100,
+  exerciseCount: 0,
+  editExercises: [],
+  weightChart: null,
+};
+
+function save() {
+  LS.set('rutinas', state.rutinas);
+  LS.set('pesos', state.pesos);
+  LS.set('objetivos', state.objetivos);
+  LS.set('perfil', state.perfil);
+  LS.set('tema', state.tema);
+  LS.set('accent', state.accent);
+  LS.set('accent2', state.accent2);
+  LS.set('bgAlpha', state.bgAlpha);
+}
+
+// =========== INIT ===========
+function init() {
+  applyTheme(state.tema);
+  applyAccent(state.accent, state.accent2);
+  if (state.bgImage) {
+    document.documentElement.style.setProperty('--custom-bg-image', `url(${state.bgImage})`);
+  }
+  setBgAlphaCSS(state.bgAlpha);
+  setNow();
+  renderDashboard();
+  renderRutinas();
+  renderWeightChart();
+  renderWeightList();
+  renderObjetivos();
+  renderProfile();
+  updateLastUse();
+}
+
+function setNow() {
+  const now = new Date().toISOString().slice(0,16);
+  ['rFechaInicio','rFechaFin','weightDate'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = now;
+  });
+}
+
+// =========== NAVIGATION ===========
+let currentPage = 'dashboard';
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.nav-item')[['dashboard','rutinas','peso','objetivos','perfil'].indexOf(page)].classList.add('active');
+  currentPage = page;
+  const titles = { dashboard:'INICIO', rutinas:'RUTINAS', peso:'PESO', objetivos:'OBJETIVOS', perfil:'PERFIL' };
+  document.getElementById('pageTitle').textContent = titles[page];
+  if (page === 'peso') { setTimeout(() => renderWeightChart(), 100); }
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('expanded');
+}
+
+// =========== THEME ===========
+function toggleTheme() {
+  setTheme(state.tema === 'dark' ? 'light' : 'dark');
+}
+function setTheme(t) {
+  state.tema = t;
+  applyTheme(t);
+  save();
+}
+function applyTheme(t) {
+  document.body.classList.toggle('light-mode', t === 'light');
+  document.querySelector('.theme-toggle').textContent = t === 'dark' ? '☀️' : '🌙';
+}
+function setAccent(c1, c2) {
+  state.accent = c1; state.accent2 = c2;
+  applyAccent(c1, c2);
+  save();
+}
+function applyAccent(c1, c2) {
+  document.documentElement.style.setProperty('--accent', c1);
+  document.documentElement.style.setProperty('--accent2', c2);
+}
+function loadBackground(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = e => {
+    state.bgImage = e.target.result;
+    LS.set('bgImage', e.target.result);
+    document.documentElement.style.setProperty('--custom-bg-image', `url(${e.target.result})`);
+    toast('Fondo actualizado');
+  };
+  r.readAsDataURL(file);
+}
+function clearBackground() {
+  state.bgImage = null;
+  LS.set('bgImage', null);
+  document.documentElement.style.setProperty('--custom-bg-image', 'none');
+  toast('Fondo eliminado');
+}
+function setBgAlpha(val) {
+  state.bgAlpha = Number(val);
+  document.getElementById('alphaVal').textContent = val + '%';
+  setBgAlphaCSS(val);
+  save();
+}
+function setBgAlphaCSS(val) {
+  document.documentElement.style.setProperty('--custom-alpha', (100 - val) / 100);
+}
+
+// =========== PROFILE ===========
+function renderProfile() {
+  const p = state.perfil;
+  document.getElementById('pNombre').value = p.nombre || '';
+  document.getElementById('pEdad').value = p.edad || '';
+  document.getElementById('pPeso').value = p.peso || '';
+  document.getElementById('pInicio').value = p.inicio || '';
+  document.getElementById('bgAlpha').value = state.bgAlpha;
+  document.getElementById('alphaVal').textContent = state.bgAlpha + '%';
+  updateProfileDisplay();
+  renderUsageHistory();
+}
+function saveProfile() {
+  state.perfil = {
+    ...state.perfil,
+    nombre: document.getElementById('pNombre').value,
+    edad: document.getElementById('pEdad').value,
+    peso: document.getElementById('pPeso').value,
+    inicio: document.getElementById('pInicio').value,
+  };
+  save();
+  updateProfileDisplay();
+  toast('Perfil guardado ✓');
+}
+function updateProfileDisplay() {
+  const p = state.perfil;
+  const n = p.nombre || 'Usuario';
+  document.getElementById('profileName').textContent = n;
+  document.getElementById('avatarInitial').textContent = n.charAt(0).toUpperCase();
+  let sub = [];
+  if (p.edad) sub.push(p.edad + ' años');
+  if (p.peso) sub.push(p.peso + ' kg');
+  if (p.inicio) sub.push('Desde ' + p.inicio);
+  document.getElementById('profileSub').textContent = sub.join(' · ') || 'Completa tu perfil';
+}
+function loadAvatar(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = e => {
+    state.perfil.avatar = e.target.result;
+    LS.set('perfil', state.perfil);
+    document.getElementById('avatarImg').src = e.target.result;
+    document.getElementById('avatarImg').style.display = 'block';
+    document.getElementById('avatarInitial').style.display = 'none';
+    toast('Foto de perfil actualizada');
+  };
+  r.readAsDataURL(file);
+}
+function updateLastUse() {
+  const history = state.perfil.useHistory || [];
+  const today = new Date().toISOString().slice(0,10);
+  if (!history.length || history[history.length-1] !== today) {
+    history.push(today);
+    state.perfil.useHistory = history.slice(-30);
+    save();
+  }
+}
+function renderUsageHistory() {
+  const h = state.perfil.useHistory || [];
+  const el = document.getElementById('usageHistory');
+  if (!h.length) { el.innerHTML = '<p style="color:var(--text3);font-size:13px;">Sin historial aún</p>'; return; }
+  el.innerHTML = h.slice().reverse().slice(0,7).map(d => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:var(--bg3);border-radius:8px;">
+      <span style="font-size:13px;color:var(--text2);">${formatDate(d)}</span>
+      <span style="font-size:11px;color:var(--text3);">Sesión registrada</span>
+    </div>`).join('');
+  if (h.length) {
+    const last = h[h.length-1];
+    el.insertAdjacentHTML('afterbegin', `<p style="font-size:12px;color:var(--text3);margin-bottom:8px;">Último acceso: <strong style="color:var(--accent)">${formatDate(last)}</strong></p>`);
+  }
+}
+
+// =========== DASHBOARD ===========
+function renderDashboard() {
+  const r = state.rutinas;
+  const p = state.pesos;
+  const o = state.objetivos;
+  const doneObj = o.filter(x => x.done).length;
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Rutinas totales</div>
+      <div class="stat-value">${r.length}</div>
+      <div class="stat-sub">registradas</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-label">Objetivos</div>
+      <div class="stat-value">${doneObj}/${o.length}</div>
+      <div class="stat-sub">completados</div>
+    </div>
+    <div class="stat-card orange">
+      <div class="stat-label">Último peso</div>
+      <div class="stat-value">${p.length ? p[p.length-1].valor + p[p.length-1].unidad : '--'}</div>
+      <div class="stat-sub">${p.length ? formatDate(p[p.length-1].fecha) : 'sin registro'}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Días activo</div>
+      <div class="stat-value">${(state.perfil.useHistory || []).length}</div>
+      <div class="stat-sub">sesiones</div>
+    </div>
+  `;
+
+  const last = r[r.length-1];
+  document.getElementById('lastActivity').innerHTML = last
+    ? `<div class="exercise-row" style="flex-direction:column;align-items:flex-start;gap:4px;">
+        <strong>${last.nombre || last.tipo}</strong>
+        <span style="font-size:12px;color:var(--text3);">${formatDate(last.fechaInicio)} · ${last.tipo}</span>
+      </div>`
+    : '<p style="color:var(--text3);font-size:13px;">No hay actividad aún</p>';
+
+  const upcoming = r.find(x => x.fechaFin && new Date(x.fechaFin) > new Date());
+  document.getElementById('nextRoutine').innerHTML = upcoming
+    ? `<div class="exercise-row" style="flex-direction:column;align-items:flex-start;gap:4px;">
+        <strong>${upcoming.nombre || upcoming.tipo}</strong>
+        <span style="font-size:12px;color:var(--accent);">${formatDate(upcoming.fechaFin)}</span>
+      </div>`
+    : '<p style="color:var(--text3);font-size:13px;">Sin próximas rutinas</p>';
+
+  const recent = r.slice(-3).reverse();
+  document.getElementById('recentRutinas').innerHTML = recent.length
+    ? recent.map(r => rutinaCardHTML(r)).join('')
+    : '<p style="color:var(--text3);font-size:13px;grid-column:1/-1;">Sin rutinas recientes</p>';
+}
+
+// =========== RUTINAS ===========
+function openModalAdd() {
+  state.exerciseCount = 0;
+  document.getElementById('exercisesContainer').innerHTML = '';
+  addExerciseField();
+  document.getElementById('modalAdd').classList.add('open');
+  setNow();
+}
+
+function addExerciseField(data) {
+  const c = document.getElementById('exercisesContainer');
+  const id = state.exerciseCount++;
+  const d = data || {};
+  const div = document.createElement('div');
+  div.className = 'card';
+  div.style.marginBottom = '12px';
+  div.innerHTML = `
+    <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+      <strong style="font-size:13px;">Ejercicio ${id+1}</strong>
+      <button class="btn btn-danger btn-sm" onclick="this.closest('div.card').remove()">✕</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Nombre</label><input type="text" class="form-input ex-nombre" placeholder="Sentadilla" value="${d.nombre||''}"></div>
+      <div class="form-group"><label class="form-label">Series</label><input type="number" class="form-input ex-series" placeholder="3" value="${d.series||''}"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Repeticiones</label><input type="number" class="form-input ex-reps" placeholder="12" value="${d.repeticiones||''}"></div>
+      <div class="form-group"><label class="form-label">Tiempo (seg)</label><input type="number" class="form-input ex-tiempo" placeholder="30" value="${d.tiempo||''}"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Tipo de peso</label>
+        <select class="form-select ex-pesoTipo" onchange="togglePesoFields(this)">
+          <option value="corporal" ${d.peso?.tipo==='corporal'?'selected':''}>Corporal</option>
+          <option value="numerico" ${d.peso?.tipo==='numerico'?'selected':''}>Numérico</option>
+        </select>
+      </div>
+      <div class="form-group ex-peso-fields" style="${d.peso?.tipo!=='numerico'?'display:none':''}">
+        <label class="form-label">Peso</label>
+        <div style="display:flex;gap:8px;">
+          <input type="number" class="form-input ex-pesoVal" placeholder="20" value="${d.peso?.pesaje||''}">
+          <select class="form-select ex-pesoUnidad" style="width:80px;">
+            <option value="kg" ${d.peso?.unidad==='kg'?'selected':''}>kg</option>
+            <option value="lb" ${d.peso?.unidad==='lb'?'selected':''}>lb</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Descanso (seg)</label>
+      <input type="number" class="form-input ex-descanso" placeholder="60" value="${d.descanso||''}">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notas del ejercicio</label>
+      <input type="text" class="form-input ex-notas" placeholder="Ej: Rodillas en línea con pies" value="${d.notas||''}">
+    </div>
+  `;
+  c.appendChild(div);
+}
+
+function togglePesoFields(sel) {
+  const f = sel.closest('.card').querySelector('.ex-peso-fields');
+  f.style.display = sel.value === 'numerico' ? '' : 'none';
+}
+
+function collectExercises(container) {
+  const cards = container.querySelectorAll('div.card');
+  return Array.from(cards).map(card => {
+    const pesoTipo = card.querySelector('.ex-pesoTipo').value;
+    const peso = { tipo: pesoTipo };
+    if (pesoTipo === 'numerico') {
+      peso.pesaje = card.querySelector('.ex-pesoVal').value;
+      peso.unidad = card.querySelector('.ex-pesoUnidad').value;
+    }
+    return {
+      nombre: card.querySelector('.ex-nombre').value,
+      series: card.querySelector('.ex-series').value,
+      repeticiones: card.querySelector('.ex-reps').value,
+      tiempo: card.querySelector('.ex-tiempo').value,
+      descanso: card.querySelector('.ex-descanso').value,
+      notas: card.querySelector('.ex-notas').value,
+      peso,
+    };
+  }).filter(e => e.nombre);
+}
+
+function saveRutina() {
+  const nombre = document.getElementById('rNombre').value.trim();
+  if (!nombre) { toast('Escribe un nombre para la rutina', true); return; }
+  const ejercicios = collectExercises(document.getElementById('exercisesContainer'));
+
+  const guardar = (foto) => {
+    const r = {
+      id: Date.now(),
+      nombre,
+      tipo: document.getElementById('rTipo').value,
+      duracion: document.getElementById('rDuracion').value,
+      fechaInicio: document.getElementById('rFechaInicio').value,
+      fechaFin: document.getElementById('rFechaFin').value,
+      dificultad: document.getElementById('rDificultad').value,
+      palabrasClave: document.getElementById('rKeywords').value.split(',').map(k=>k.trim()).filter(Boolean),
+      objetivo: document.getElementById('rObjetivo').value,
+      notas: document.getElementById('rNotas').value,
+      rutina: ejercicios,
+      foto: foto || null,
+      creadaEl: new Date().toISOString(),
+    };
+    state.rutinas.push(r);
+    save();
+    closeModal('modalAdd');
+    renderRutinas();
+    renderDashboard();
+    toast('Rutina guardada ✓');
+  };
+
+  const fotoInput = document.getElementById('rFoto');
+  if (fotoInput.files[0]) {
+    const rd = new FileReader();
+    rd.onload = e => guardar(e.target.result);
+    rd.readAsDataURL(fotoInput.files[0]);
+  } else { guardar(null); }
+}
+
+function renderRutinas() {
+  const search = (document.getElementById('searchInput')?.value||'').toLowerCase();
+  const tipo = document.getElementById('filterType')?.value||'';
+  let list = state.rutinas.filter(r => {
+    const matchSearch = !search || (r.nombre||'').toLowerCase().includes(search) || (r.palabrasClave||[]).some(k=>k.toLowerCase().includes(search));
+    const matchTipo = !tipo || r.tipo === tipo;
+    return matchSearch && matchTipo;
+  });
+  const grid = document.getElementById('rutinasGrid');
+  const empty = document.getElementById('rutinasEmpty');
+  if (!list.length) { grid.innerHTML=''; empty.style.display=''; return; }
+  empty.style.display='none';
+  grid.innerHTML = list.map(r => rutinaCardHTML(r)).join('');
+}
+
+function rutinaCardHTML(r) {
+  const kw = (r.palabrasClave||[]).slice(0,4).map(k=>`<span class="keyword-tag">${k}</span>`).join('');
+  const exs = (r.rutina||[]).slice(0,3).map(e=>{
+    const pesoStr = e.peso?.tipo==='numerico' ? `${e.peso.pesaje||''} ${e.peso.unidad||''}` : 'corporal';
+    const rep = e.repeticiones ? `${e.series||''}x${e.repeticiones}` : (e.tiempo ? `${e.tiempo}s` : '');
+    return `<div class="exercise-row"><span class="exercise-name">${e.nombre}</span><span class="exercise-detail">${rep} · ${pesoStr}</span></div>`;
+  }).join('');
+  const foto = r.foto ? `<img class="rutina-photo" src="${r.foto}" alt="rutina">` : '';
+  const obj = r.objetivo ? `<div class="objetivo-badge">🎯 ${r.objetivo}</div>` : '';
+  return `
+    <div class="rutina-card" onclick="viewRutina(${r.id})">
+      <div class="rutina-card-header">
+        <div>
+          <div class="rutina-name">${r.nombre || r.tipo}</div>
+          <div class="rutina-meta">${formatDate(r.fechaInicio)} ${r.duracion ? '· '+r.duracion+' min':''} ${r.dificultad?'· '+r.dificultad:''}</div>
+        </div>
+        <span class="rutina-type-badge">${r.tipo}</span>
+      </div>
+      ${foto}
+      <div class="rutina-exercises">${exs}</div>
+      ${r.rutina?.length > 3 ? `<div style="font-size:11px;color:var(--text3);margin-top:4px;">+${r.rutina.length-3} ejercicios más</div>` : ''}
+      ${obj}
+      <div class="rutina-keywords">${kw}</div>
+      <div class="rutina-actions" onclick="event.stopPropagation()">
+        <button class="btn btn-ghost btn-sm" onclick="editRutina(${r.id})">✏️ Editar</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteRutina(${r.id})">🗑️ Eliminar</button>
+      </div>
+    </div>`;
+}
+
+function viewRutina(id) {
+  const r = state.rutinas.find(x => x.id === id);
+  if (!r) return;
+  const exRows = (r.rutina||[]).map(e => {
+    const pesoStr = e.peso?.tipo==='numerico' ? `${e.peso.pesaje||''} ${e.peso.unidad||''}` : 'corporal';
+    const rep = e.repeticiones ? `${e.series||''}x${e.repeticiones}` : (e.tiempo ? `${e.tiempo}s`:'');
+    return `<div class="exercise-row">
+      <div><div class="exercise-name">${e.nombre}</div>${e.notas?`<div style="font-size:11px;color:var(--text3);margin-top:2px;">${e.notas}</div>`:''}</div>
+      <div style="text-align:right;"><span class="exercise-detail">${rep}</span><div style="font-size:11px;color:var(--text3);">${pesoStr}</div></div>
+    </div>`;
+  }).join('');
+  const kw = (r.palabrasClave||[]).map(k=>`<span class="keyword-tag">${k}</span>`).join('');
+  document.getElementById('modalViewContent').innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+      <div>
+        <div class="modal-title" style="margin-bottom:4px;">${r.nombre}</div>
+        <span class="rutina-type-badge">${r.tipo}</span>
+        ${r.dificultad ? `<span class="rutina-type-badge" style="background:var(--surface2);color:var(--text);margin-left:6px;">${r.dificultad}</span>` : ''}
+      </div>
+    </div>
+    ${r.foto ? `<img src="${r.foto}" style="width:100%;height:160px;object-fit:cover;border-radius:12px;margin-bottom:16px;" alt="">` : ''}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+      <div style="background:var(--bg3);border-radius:10px;padding:12px;"><div class="stat-label">Inicio</div><div style="font-size:13px;">${formatDate(r.fechaInicio)||'—'}</div></div>
+      <div style="background:var(--bg3);border-radius:10px;padding:12px;"><div class="stat-label">Fin</div><div style="font-size:13px;">${formatDate(r.fechaFin)||'—'}</div></div>
+      <div style="background:var(--bg3);border-radius:10px;padding:12px;"><div class="stat-label">Duración</div><div style="font-size:13px;">${r.duracion ? r.duracion+' min' : '—'}</div></div>
+      <div style="background:var(--bg3);border-radius:10px;padding:12px;"><div class="stat-label">Ejercicios</div><div style="font-size:13px;">${(r.rutina||[]).length}</div></div>
+    </div>
+    ${r.objetivo ? `<div class="objetivo-badge" style="margin-bottom:12px;">🎯 ${r.objetivo}</div>` : ''}
+    ${r.notas ? `<p style="font-size:13px;color:var(--text2);margin-bottom:14px;">${r.notas}</p>` : ''}
+    <div class="section-title">Ejercicios</div>
+    <div class="rutina-exercises">${exRows || '<p style="color:var(--text3);font-size:13px;">Sin ejercicios</p>'}</div>
+    <div class="rutina-keywords" style="margin-top:12px;">${kw}</div>
+  `;
+  document.getElementById('modalViewActions').innerHTML = `
+    <button class="btn btn-accent" onclick="closeModal('modalView');editRutina(${r.id})">✏️ Editar</button>
+    <button class="btn btn-ghost" onclick="closeModal('modalView')">Cerrar</button>
+    <button class="btn btn-danger" onclick="closeModal('modalView');deleteRutina(${r.id})">🗑️ Eliminar</button>
+  `;
+  document.getElementById('modalView').classList.add('open');
+}
+
+function editRutina(id) {
+  const r = state.rutinas.find(x => x.id === id);
+  if (!r) return;
+  document.getElementById('editId').value = id;
+  document.getElementById('eNombre').value = r.nombre || '';
+  document.getElementById('eTipo').value = r.tipo || 'repeticiones';
+  document.getElementById('eDuracion').value = r.duracion || '';
+  document.getElementById('eKeywords').value = (r.palabrasClave||[]).join(', ');
+  document.getElementById('eObjetivo').value = r.objetivo || '';
+  document.getElementById('eNotas').value = r.notas || '';
+  document.getElementById('modalEdit').classList.add('open');
+}
+
+function updateRutina() {
+  const id = Number(document.getElementById('editId').value);
+  const idx = state.rutinas.findIndex(x => x.id === id);
+  if (idx === -1) return;
+
+  const guardar = (foto) => {
+    state.rutinas[idx] = {
+      ...state.rutinas[idx],
+      nombre: document.getElementById('eNombre').value,
+      tipo: document.getElementById('eTipo').value,
+      duracion: document.getElementById('eDuracion').value,
+      palabrasClave: document.getElementById('eKeywords').value.split(',').map(k=>k.trim()).filter(Boolean),
+      objetivo: document.getElementById('eObjetivo').value,
+      notas: document.getElementById('eNotas').value,
+      foto: foto !== undefined ? foto : state.rutinas[idx].foto,
+    };
+    save();
+    closeModal('modalEdit');
+    renderRutinas();
+    renderDashboard();
+    toast('Rutina actualizada ✓');
+  };
+
+  const fotoInput = document.getElementById('eFoto');
+  if (fotoInput.files[0]) {
+    const rd = new FileReader();
+    rd.onload = e => guardar(e.target.result);
+    rd.readAsDataURL(fotoInput.files[0]);
+  } else { guardar(undefined); }
+}
+
+function deleteRutina(id) {
+  if (!confirm('¿Eliminar esta rutina?')) return;
+  state.rutinas = state.rutinas.filter(x => x.id !== id);
+  save();
+  renderRutinas();
+  renderDashboard();
+  toast('Rutina eliminada');
+}
+
+// =========== JSON IMPORT ===========
+const JSON_TEMPLATE = {
+  "nombre": "Nombre de la rutina",
+  "tipo": "tabata | repeticiones | circuito | amrap | fuerza | cardio | yoga | hiit | otro",
+  "duracion_minutos": 45,
+  "dificultad": "principiante | intermedio | avanzado",
+  "palabras_clave": ["funcional","hipertrofia","recuperacion"],
+  "objetivo": "Descripción del objetivo",
+  "notas": "Notas adicionales",
+  "fecha_inicio": "2025-01-01T07:00",
+  "fecha_fin": "2025-01-01T07:45",
+  "rutina": [
+    {
+      "nombre": "Sentadilla",
+      "series": 4,
+      "repeticiones": 12,
+      "tiempo": null,
+      "descanso": 60,
+      "notas": "Rodillas alineadas",
+      "peso": { "tipo": "numerico", "pesaje": 60, "unidad": "kg" }
+    },
+    {
+      "nombre": "Plancha",
+      "series": 3,
+      "repeticiones": null,
+      "tiempo": 30,
+      "descanso": 45,
+      "notas": "",
+      "peso": { "tipo": "corporal" }
+    }
+  ]
+};
+
+function openModalJson() {
+  document.getElementById('jsonTemplate').textContent = JSON.stringify(JSON_TEMPLATE, null, 2);
+  document.getElementById('jsonInput').value = '';
+  document.getElementById('modalJson').classList.add('open');
+}
+
+function copyJsonTemplate() {
+  navigator.clipboard.writeText(JSON.stringify(JSON_TEMPLATE, null, 2));
+  toast('Template copiado 📋');
+}
+
+function importJson() {
+  const raw = document.getElementById('jsonInput').value.trim();
+  let data;
+  try { data = JSON.parse(raw); } catch { toast('JSON inválido. Revisa el formato', true); return; }
+
+  const r = {
+    id: Date.now(),
+    nombre: data.nombre || data.tipo || 'Rutina importada',
+    tipo: data.tipo || 'otro',
+    duracion: data.duracion_minutos || data.duracion || '',
+    fechaInicio: data.fecha_inicio || data.fechaInicio || new Date().toISOString(),
+    fechaFin: data.fecha_fin || data.fechaFin || '',
+    dificultad: data.dificultad || '',
+    palabrasClave: data.palabras_clave || data.palabrasClave || [],
+    objetivo: data.objetivo || '',
+    notas: data.notas || '',
+    rutina: (data.rutina || []).map(e => ({
+      nombre: e.nombre || e['nombre de ejercicio'] || '',
+      series: e.series || '',
+      repeticiones: e.repeticiones || e['cantidad de repeticiones'] || '',
+      tiempo: e.tiempo || '',
+      descanso: e.descanso || '',
+      notas: e.notas || '',
+      peso: e.peso || { tipo: 'corporal' },
+    })),
+    foto: null,
+    creadaEl: new Date().toISOString(),
+  };
+  state.rutinas.push(r);
+  save();
+  closeModal('modalJson');
+  renderRutinas();
+  renderDashboard();
+  toast('Rutina importada ✓');
+}
+
+// =========== PESO ===========
+function addWeight() {
+  const val = parseFloat(document.getElementById('newWeight').value);
+  const unit = document.getElementById('weightUnit').value;
+  const date = document.getElementById('weightDate').value;
+  if (!val || val <= 0) { toast('Ingresa un peso válido', true); return; }
+  state.pesos.push({ id: Date.now(), valor: val, unidad: unit, fecha: date || new Date().toISOString() });
+  state.pesos.sort((a,b) => new Date(a.fecha) - new Date(b.fecha));
+  save();
+  renderWeightChart();
+  renderWeightList();
+  renderDashboard();
+  document.getElementById('newWeight').value = '';
+  toast('Peso registrado ✓');
+}
+
+function renderWeightList() {
+  const list = document.getElementById('weightList');
+  const sorted = [...state.pesos].reverse().slice(0,10);
+  list.innerHTML = sorted.map(p => `
+    <div class="weight-item">
+      <div>
+        <div class="weight-val">${p.valor} <span style="font-size:13px;font-family:'DM Sans';color:var(--text2);">${p.unidad}</span></div>
+        <div class="weight-date">${formatDate(p.fecha)}</div>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="deleteWeight(${p.id})">✕</button>
+    </div>`).join('') || '<p style="color:var(--text3);font-size:13px;margin-top:12px;">Sin registros</p>';
+}
+
+function deleteWeight(id) {
+  state.pesos = state.pesos.filter(p => p.id !== id);
+  save();
+  renderWeightChart();
+  renderWeightList();
+  renderDashboard();
+}
+
+function renderWeightChart() {
+  const canvas = document.getElementById('weightChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const data = state.pesos;
+  const W = canvas.clientWidth || 500, H = 220;
+  canvas.width = W; canvas.height = H;
+  ctx.clearRect(0,0,W,H);
+
+  const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#e0ff4f';
+  const text2 = getComputedStyle(document.documentElement).getPropertyValue('--text2').trim() || '#9090a8';
+  const border = getComputedStyle(document.documentElement).getPropertyValue('--border').trim() || '#2e2e3a';
+  const bg3 = getComputedStyle(document.documentElement).getPropertyValue('--bg3').trim() || '#222228';
+
+  ctx.fillStyle = bg3;
+  ctx.roundRect ? ctx.roundRect(0,0,W,H,10) : ctx.rect(0,0,W,H);
+  ctx.fill();
+
+  if (data.length < 2) {
+    ctx.fillStyle = text2;
+    ctx.font = '14px DM Sans, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Añade al menos 2 registros para ver la gráfica', W/2, H/2);
+    return;
+  }
+
+  const pad = { t:20, r:20, b:40, l:50 };
+  const pw = W - pad.l - pad.r, ph = H - pad.t - pad.b;
+  const vals = data.map(d => d.valor);
+  const minV = Math.min(...vals), maxV = Math.max(...vals);
+  const range = maxV - minV || 1;
+  const xScale = pw / (data.length - 1);
+  const yScale = ph / range;
+
+  // Grid
+  const steps = 4;
+  ctx.strokeStyle = border; ctx.lineWidth = 1;
+  for (let i = 0; i <= steps; i++) {
+    const y = pad.t + ph - (i / steps) * ph;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + pw, y); ctx.stroke();
+    ctx.fillStyle = text2; ctx.font = '11px DM Mono, monospace'; ctx.textAlign = 'right';
+    ctx.fillText((minV + (range * i / steps)).toFixed(1), pad.l - 8, y + 4);
+  }
+
+  // Area fill
+  const gradient = ctx.createLinearGradient(0, pad.t, 0, pad.t + ph);
+  gradient.addColorStop(0, accent + '44');
+  gradient.addColorStop(1, accent + '00');
+  ctx.beginPath();
+  data.forEach((d, i) => {
+    const x = pad.l + i * xScale, y = pad.t + ph - (d.valor - minV) * yScale;
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.lineTo(pad.l + (data.length-1)*xScale, pad.t + ph);
+  ctx.lineTo(pad.l, pad.t + ph);
+  ctx.closePath();
+  ctx.fillStyle = gradient;
+  ctx.fill();
+
+  // Line
+  ctx.beginPath(); ctx.strokeStyle = accent; ctx.lineWidth = 2.5; ctx.lineJoin = 'round';
+  data.forEach((d, i) => {
+    const x = pad.l + i * xScale, y = pad.t + ph - (d.valor - minV) * yScale;
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  // Dots
+  data.forEach((d, i) => {
+    const x = pad.l + i * xScale, y = pad.t + ph - (d.valor - minV) * yScale;
+    ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI*2);
+    ctx.fillStyle = accent; ctx.fill();
+    ctx.strokeStyle = bg3; ctx.lineWidth = 2; ctx.stroke();
+  });
+
+  // X labels
+  ctx.fillStyle = text2; ctx.font = '10px DM Mono, monospace'; ctx.textAlign = 'center';
+  const step = Math.max(1, Math.floor(data.length / 6));
+  data.forEach((d, i) => {
+    if (i % step === 0 || i === data.length-1) {
+      const x = pad.l + i * xScale;
+      ctx.fillText(new Date(d.fecha).toLocaleDateString('es-MX', {month:'short',day:'numeric'}), x, H - 8);
+    }
+  });
+}
+
+// =========== OBJETIVOS ===========
+function openModalObjetivo() {
+  document.getElementById('objTitulo').value = '';
+  document.getElementById('objDesc').value = '';
+  document.getElementById('objTipo').value = 'general';
+  document.getElementById('objFecha').value = '';
+  const rutinaSelect = document.getElementById('objRutina');
+  rutinaSelect.innerHTML = state.rutinas.map(r => `<option value="${r.id}">${r.nombre||r.tipo}</option>`).join('');
+  document.getElementById('objRutinaGroup').style.display = 'none';
+  document.getElementById('objTipo').onchange = function() {
+    document.getElementById('objRutinaGroup').style.display = this.value === 'rutina' ? '' : 'none';
+  };
+  document.getElementById('modalObjetivo').classList.add('open');
+}
+
+function saveObjetivo() {
+  const titulo = document.getElementById('objTitulo').value.trim();
+  if (!titulo) { toast('Escribe un objetivo', true); return; }
+  const tipo = document.getElementById('objTipo').value;
+  state.objetivos.push({
+    id: Date.now(),
+    titulo,
+    desc: document.getElementById('objDesc').value,
+    tipo,
+    rutinaId: tipo === 'rutina' ? document.getElementById('objRutina').value : null,
+    fecha: document.getElementById('objFecha').value,
+    done: false,
+    creadoEl: new Date().toISOString(),
+  });
+  save();
+  closeModal('modalObjetivo');
+  renderObjetivos();
+  renderDashboard();
+  toast('Objetivo guardado ✓');
+}
+
+function renderObjetivos() {
+  const generales = state.objetivos.filter(o => o.tipo === 'general');
+  const porRutina = state.objetivos.filter(o => o.tipo === 'rutina');
+  const renderList = (list, el) => {
+    el.innerHTML = list.length ? list.map(o => {
+      const r = o.rutinaId ? state.rutinas.find(x => x.id == o.rutinaId) : null;
+      return `<div class="objetivo-card">
+        <div class="objetivo-check ${o.done?'done':''}" onclick="toggleObjetivo(${o.id})">
+          ${o.done ? '✓' : ''}
+        </div>
+        <div class="objetivo-text ${o.done?'done':''}">
+          <h4>${o.titulo}</h4>
+          <p>${o.desc || ''}${r?' · '+r.nombre:''}${o.fecha?' · '+formatDate(o.fecha):''}</p>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="deleteObjetivo(${o.id})">✕</button>
+      </div>`;
+    }).join('') : '<p style="color:var(--text3);font-size:13px;">Sin objetivos</p>';
+  };
+  renderList(generales, document.getElementById('objetivosGenerales'));
+  renderList(porRutina, document.getElementById('objetivosRutina'));
+}
+
+function toggleObjetivo(id) {
+  const o = state.objetivos.find(x => x.id === id);
+  if (o) { o.done = !o.done; save(); renderObjetivos(); renderDashboard(); }
+}
+
+function deleteObjetivo(id) {
+  state.objetivos = state.objetivos.filter(x => x.id !== id);
+  save();
+  renderObjetivos();
+  renderDashboard();
+}
+
+// =========== MODAL ===========
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+// =========== TOAST ===========
+function toast(msg, err) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (err?' error':'') + ' show';
+  setTimeout(() => t.className = 'toast', 3000);
+}
+
+// =========== UTILS ===========
+function formatDate(d) {
+  if (!d) return '';
+  try {
+    return new Date(d).toLocaleDateString('es-MX', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+  } catch { return d; }
+}
+
+// =========== RESPONSIVE ===========
+function checkMobile() {
+  if (window.innerWidth < 640) {
+    document.querySelectorAll('.two-col').forEach(el => {
+      el.style.gridTemplateColumns = '1fr';
+    });
+  }
+}
+window.addEventListener('resize', () => { checkMobile(); renderWeightChart(); });
+
+// =========== AVATAR INIT ===========
+function initAvatar() {
+  const p = state.perfil;
+  if (p.avatar) {
+    document.getElementById('avatarImg').src = p.avatar;
+    document.getElementById('avatarImg').style.display = 'block';
+    document.getElementById('avatarInitial').style.display = 'none';
+  }
+}
+
+// =========== START ===========
+init();
+initAvatar();
+checkMobile();
+</script>
+</body>
+</html>
